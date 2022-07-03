@@ -1,0 +1,130 @@
+/*
+ 1. Верните имена и фамилии  пользователей приведя имена в нижний регистр а фамилии в верхний
+ */
+select
+    lower(first_name) as Lower_register,
+    upper(last_name) as Upper_register
+from "user";
+/*
+ 2. Верните имена и фамилии пользователейа также их  никнейм в одной строке
+ с пробелами, а столбец переименуйте в person
+ */
+select
+    concat(first_name, last_name, nickname) as Person
+from "user";
+/*
+ 3. Высчитайте от всех дебетовых успешных транзакций 11.5%.
+ представте результат с округлением в 2 знака.
+ */
+ select round((count( transaction_type)*11.5/100),2) as result
+ from billing_transaction
+ where transaction_status='SUCCESS' and transaction_type='DEBIT';
+/*
+ 4. Верните количество пользователей, которые активны с Украины
+ и имеют номер телефона.
+ */
+select count(country)
+from "user"
+where state='active'
+  and country='UA'
+  and phone is not null ;
+/*
+5. Верните количество пользователей с каждой страны. В ответе должна быть страна
+и колличество  юзеров в ней.
+ */
+select
+    country, count(country)  as count_users
+from "user"
+where country is not null
+group by  country;
+/*
+ 6. Из задания 5 считайте только активных
+ клиентов исполнителей (кто такой клиент и исполнитель посмотреть в таблице role_naming)
+ */
+ select
+     role_id, country, state,
+        count(country)  as count_users
+ from "user"
+ where role_id in (1, 5) and  state='active' and country is not null
+ group by  country,  state, role_id;
+/*
+7. Посчитайте в какой таймзоне и в каких state есть пользователи в базе данных.
+ */
+ select
+     timezone, state,
+     count(timezone) as count_timezone,
+     count( state) as count_state
+ from "user"
+ where timezone  is not null
+ group by timezone, state;
+/*
+8.  Верните самый большой баланс кошелька типа Visa
+и его дата создания после 2005года
+ */
+ select
+     payment_method,balance,date_created
+ from user_billing_wallet
+ where payment_method='Visa' and date_created >'2005-12-31'
+ order by balance desc limit 1;
+/*
+ 9. Верните самый маленький баланс кошелька типа PayPal
+ и его дата создания после 2003 года
+ */
+ select
+     payment_method,balance
+ from user_billing_wallet
+ where payment_method='PayPal' and date_created >'2003-12-31'
+ order by balance  limit 1;
+/*
+ 10. верните кошельки пользователй с именем Serhii
+ */
+ select * from user_billing_wallet where holder_name like 'Serhii%';
+/*
+11.** Показать платежные методы и сумму балансов по ним, при условии что
+    клиенты активные из Укрианы.
+    Отобразить результаты которые не пустые и сумма по данным платежным меодам
+    боле 4000
+
+    PS в результате должны быть два столбца в один из которых нейм пеймент метода
+    а второй сумма балансов.
+ */
+
+select payment_method, sum(balance)
+from user_billing_wallet
+    join "user" u on u.id = user_billing_wallet.user_id
+where payment_method is not null and country='UA' and state='active'
+group by payment_method having  sum(balance)>4000;
+
+/*
+select distinct
+(select  sum(balance) as PayPal
+from user_billing_wallet join "user" u on u.id = user_billing_wallet.user_id
+where payment_method='PayPal' and country='UA' and state='active' having sum(balance)>4000),
+    (select  sum(balance) as viza
+from user_billing_wallet join "user" u on u.id = user_billing_wallet.user_id
+where payment_method='Visa' and country='UA' and state='active' having sum(balance)>4000),
+    (select  sum(balance) as MasterCard
+from user_billing_wallet join "user" u on u.id = user_billing_wallet.user_id
+where payment_method='MasterCard' and country='UA' and state='active' having sum(balance)>4000 )
+from user_billing_wallet join "user" u2 on u2.id = user_billing_wallet.user_id;
+*/
+-- Результат тот же но долго и мучительно)))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

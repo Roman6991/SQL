@@ -1,0 +1,111 @@
+/*
+1. Верните пользователей у которых верифицированы телефоны и в
+номере которых есть хотя бы одна цифра 3 или тех у которых номер
+заканчивается на 0.
+*/
+select * from user_phones
+         where verify='true' and cast(value as text) like '%3%'
+            or cast(value as text) like '%0';
+/*
+2. Верните всех юзеров их кошельки и транзакции.
+*/
+select * from "user"
+    join user_billing_wallet ubw on "user".id = ubw.user_id
+    join billing_transaction bt on ubw.id = bt.wallet_id;
+/*
+3. Верните никнейм кастомера и ордер у которого нет ревью
+или оценка меньше 5
+*/
+
+select  nickname, order_id, review_stars
+from "order" full outer join review r on "order".id = r.order_id
+    join "user" u on u.id = "order".customer_id where order_id is null or review_stars<5;
+
+/*
+4. Верните ид ордера его статус, топик, язык в визуально
+понятном виде(из соответсующих таблиц словарей)
+*/
+SELECT  "order".id, name, topic_translate, full_name from "order"
+    join order_status os on "order".status = os.normalize_name
+    join order_topics ot on "order".theme_id = ot.id join lang l on l.id = "order".language_id;
+/*
+5. Верните количество успешных транзакций пользователей с разных
+стран
+(в ответе страна и количество транзакций)
+*/
+SELECT country, count(transaction_status) as количество_транзакций
+from billing_transaction
+    join user_billing_wallet ubw on ubw.id = billing_transaction.wallet_id
+    join "user" u on u.id = ubw.user_id
+    where country is not null
+    and transaction_status='SUCCESS' group by country;
+/*
+6. Добавте еще один ордер топик в базу данных
+*/
+insert into order_topics(topic_name, topic_translate)
+VALUES ('Kotenko_HW3', '{"UA": "HW3"}');
+/*
+7. Обновите комментарий в любом одном из статусов ордеров.
+*/
+update order_status set
+description='ERROR'
+where description='Ошибка выполнения';
+
+/*
+8.* Верните ползователей которым более 20 лет.
+(нужно использовать функции а не считать даты)
+*/
+select * from "user"
+                      where age(birthdate) is not null
+                      order by  birthdate desc offset 4;
+-- если  пользователей которым нет 20 лет будет большое количество,
+-- это решение не будет практичным.
+/*
+9.** Создайте пользователя(роль клиент), внесите ему телефон в
+таблицу телефонов,
+присвойте ему менджера соответсвующей роли.
+создайте ему кошелек, и одну успешнутю транзакцию.
+а также создайте ему ордер и к данному ордеру ревью.
+(в результате я хочу увидеть пачку запросов которые
+нужно выполнить, один за одним (учтите что в таблце user сломан
+автоинкримент а в дргих нет), последовательность запросов имеет
+значение.)
+*/
+insert into "user" (password, first_name, last_name, online, state, phone, role_id, manager_id)
+values('qwerty', 'Roman', 'Kotenko', 'false','active', 0687475636, 1, 17);
+insert into user_billing_wallet(user_id, balance,  payment_method)
+values (30, 7467, 'visa');
+insert into billing_transaction ( transaction_amount, wallet_id, transaction_type, transaction_status)
+values (7000, 28,'CREDIT', 'SUCCESS');
+insert into user_phones ( value, code, verify,  user_id)
+values (687475636, 1234,'true', 30);
+insert into "order" (price, customer_id, executor_id, customer_manager_id,order_title, deadline,  theme_id,  status, language_id )
+values (7000, 2 ,3, 4, 'test', '2020-11-06 00:15:34.684000 +00:00', 5, 'COMPLETED', 2);
+insert into review( order_id,  review_massage, review_stars)
+values (86, ' blablabla', 4);
+/*
+10.** Верните запросы которые позволят вам полностью
+удалить то что будет создано в задании 9.
+(запросы которые постепенно удалят полностью вашего юзера с базы
+данных)
+*/
+select * from review where id='18';
+delete from review where id='18';
+select * from "order";
+delete from "order" where id='86';
+select * from user_phones;
+delete from user_phones where id='25';
+select * from billing_transaction;
+delete from billing_transaction where id='37';
+select *from user_billing_wallet;
+delete from user_billing_wallet where id='28';
+select * from  "user";
+delete from "user" where id='30';
+
+
+
+
+
+
+
+

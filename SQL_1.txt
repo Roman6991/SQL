@@ -1,0 +1,189 @@
+/*
+ 1.
+ Вернуть все записи с таблицы транзакций
+
+ */
+select *
+from billing_transaction;
+/*
+ 2.
+ Вернуть уникальные типы транзакций с таблицытранзакций
+ */
+SELECT distinct transaction_type
+from billing_transaction;
+/*
+ 3.
+ Верните 5 первых записей в которых будет сумма транзакции,  ее дата и статус из таблицы транзакций
+ отсортировав по убыванию суммы транзакций.
+ */
+select
+transaction_amount, transaction_date, transaction_status from billing_transaction
+order by transaction_amount desc
+limit 5;
+/*
+ 4.
+ Верните уникальные суммы транзакций и даты их создания и таблицы транзакций
+ */
+SELECT distinct transaction_amount, transaction_date
+from billing_transaction;
+
+/*
+ 5.
+ Верните сумму транзакции ее тип и статус из таблицы транзакций
+ все транзакции должны быть с отрицательно й суммой.
+ */
+SELECT  transaction_status, transaction_type, transaction_amount
+from billing_transaction
+where transaction_amount < -0;
+/*
+ 6.
+ Верните тразакции с сумой от -1500 до 10000 из таблицы транзакций обе границы включая
+ */
+select *
+from billing_transaction
+where transaction_amount between -1500 and 10000;
+/*
+ 7.
+ Верните самую крупную транзакцию, по сумме из таблицы транзакций.
+ (использовать конструкциию tr_amount=50000 и подобные нельзя, данная функция должна быть универсальна
+ а не только для конкретной таблицы)
+ */
+/*
+SELECT max(transaction_amount)
+from billing_transaction;
+*/
+
+SELECT *
+from billing_transaction
+order by transaction_amount desc
+limit 1;
+
+/*
+ 8.
+ Верните вторую по сумме транзакцию  из таблицы транзакций.
+ (использовать конструкциию tr_amount=50000 и подобные нельзя, данная функция должна быть универсальна
+ а не только для конкретной таблицы)
+ */
+select *
+from billing_transaction
+order by transaction_amount desc
+limit 1 offset 1;
+/*
+ 9.
+ Верните все транзакции которые пренадлежат кошелькам 3, 10, 6
+ нужно вернуть поля суммы транзакций и переименовать его в amount, дату ее создания тип и статус.
+ */
+select wallet_id, transaction_amount as amount,
+       transaction_date   as amount,
+       transaction_type   as amount,
+       transaction_status as amount
+from billing_transaction
+where wallet_id in (3, 10, 6);
+
+
+/*
+ 10. Вернуть все транакции  у которых тип дебит и статус успешен(success)
+ */
+select *
+from billing_transaction
+where transaction_status = 'SUCCESS'
+  and transaction_type = 'DEBIT';
+/*
+ 11. решить следующие булевые выражения:
+ (ответ прямо тут в комментарии через равно)
+
+ True and True = True
+ False or False = False
+ False and true = False
+
+ (False and not True) or (True or not False) = True
+ ((True and True) or False) and True = True
+ True and False or True or False and not True = False
+ */
+
+/*
+ 12.
+  Из таблицы кошельков вернуть все записи которые удовлетваряют условия
+ платежный метод Виза и Мастер Кард и баланс больше ноля
+ */
+select *
+from user_billing_wallet
+where balance > 0
+  and payment_method in ('MasterCard', 'Visa');
+/*
+ 13.
+  Из таблицы кошельков вернуть все записи которые удовлетваряют условия
+ баланс больше 10000 или меньше равно 1
+ */
+select *
+from user_billing_wallet
+where balance > 10000
+   or balance <= 1;
+
+/*
+ 14. Вернуть все кошельки у которых есть имя владельца(holder_name)
+ */
+select *
+from user_billing_wallet
+where holder_name is not null;
+/*
+ 15.
+    Вернуть кошельки которые были созданы после начала 2010 года
+ (скопирвоать дату из таблицы будет неверным решением)
+ */
+select *
+FROM user_billing_wallet
+WHERE date_created >= '2010-01-01';
+/*
+ 16.
+ Вернуть информацию по кошельку pay@gmail.com из таблицы кошельков.
+ */
+SELECT *
+FROM user_billing_wallet
+WHERE payment_info = 'pay@gmail.com';
+/*
+17.
+    Вернуть информацию по пользователям у которых нет аватарки и статус неверефецирован
+    из таблицы пользователей
+ */
+SELECT *
+FROM "user"
+WHERE avatar IS NULL
+  AND state = 'unverified';
+/*
+ 18.
+  Вернуть пользователей у которых есть телефоны  и живут они в Укриане при этом они
+ не должны быть зарегестрирвоаны через соцыальную сеть.
+ */
+SELECT *
+FROM "user"
+WHERE phone IS NOT NULL
+  AND country = 'UA'
+  and social_registration = 'false';
+/*
+19.
+    Верните самого старшего спользователя с именем Serhii
+ */
+select *
+from "user"
+where first_name = 'Serhii'
+order by birthdate
+limit 1;
+/*
+ 20.**
+  Посчитать длину никнейма каждого пользователя добавить в ответ этот столбец с название nick_len
+ а также отсортировать от самого длинного к самому короткому никнейму.
+ PS.
+ В ответе должны быть все поля юзера плюс поле nick_len
+ */
+
+select *, length(nickname) as nick_len
+from "user"
+where nickname is not null
+order by nick_len desc;
+
+
+
+
+
+
